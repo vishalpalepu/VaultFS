@@ -32,7 +32,7 @@ VaultFS is a federated resource and knowledge management platform built with Nex
 - One or more Cloudinary accounts (to add as storage nodes).
 
 ### 2. Configure Environment Variables
-Create a file named `.env.local` inside the `vaultfs-app` directory:
+Create a file named `.env.local`:
 
 ```env
 # MongoDB Connection URI
