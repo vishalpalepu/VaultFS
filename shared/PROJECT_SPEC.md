@@ -32,3 +32,27 @@
 
 **MVP Scope** Folder hierarchy, MongoDB metadata management, client-side deduplication hashes, Next.js UI, multi-node Cloudinary federation, direct trust relationships, capacity-aware routing, node health checks, storage leases, event logs, and resource linking.
 
+
+# MVP Features
+
+- Authentication
+- Folder hierarchy
+- Notes
+- File upload
+- Cloudinary nodes
+- Storage leases
+- Search
+- PDF viewer
+- Video viewer
+
+# Phase 2
+
+- Event logs
+- Deduplication
+- Resource linking
+
+# Phase 3
+
+- Recommendations
+- Analytics
+- Replication
