@@ -1,11 +1,11 @@
 // ============================================================
-// Next.js Edge Middleware for Route Protection
+// Next.js Proxy for Route Protection (replaces deprecated middleware.ts)
 // ============================================================
 
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const sessionToken =
     req.cookies.get("next-auth.session-token")?.value ||
     req.cookies.get("__Secure-next-auth.session-token")?.value ||

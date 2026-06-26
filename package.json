@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "npx tsx scripts/seed.ts"
+    "db:seed": "npx tsx scripts/seed.ts",
+    "postinstall": "node -e \"const fs=require('fs');const s='node_modules/pdfjs-dist/build/pdf.worker.min.mjs';const d='public/pdf.worker.min.mjs';if(fs.existsSync(s)){fs.copyFileSync(s,d);console.log('Copied pdf.worker.min.mjs to public/')}\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -15,6 +16,7 @@
     "mongoose": "^8.24.1",
     "next": "16.2.9",
     "next-auth": "^5.0.0-beta.31",
+    "pdfjs-dist": "^5.4.624",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-markdown": "^10.1.0"

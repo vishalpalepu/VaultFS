@@ -79,7 +79,12 @@ export async function uploadToCloudinary(
         chunk_size: 6000000, // 6MB chunks to prevent HTTP 413 Payload Too Large on Cloudinary servers
       },
       (error, result) => {
-        if (error) return reject(error);
+        console.log("=== CLOUDINARY UPLOAD RESPONSE ===");
+        if (error) {
+          console.error("Cloudinary Upload Error Details:", error);
+          return reject(error);
+        }
+        console.log("Cloudinary Upload Result Details:", JSON.stringify(result, null, 2));
         if (!result) return reject(new Error("No result from Cloudinary upload"));
         resolve({
           publicId: result.public_id,
@@ -126,6 +131,8 @@ export function getCloudinaryUrl(
     api_key: node.apiKey,
     api_secret: node.apiSecret,
     secure: true,
+    sign_url: true,
+    type: "upload",
   };
 
   if (format) {
