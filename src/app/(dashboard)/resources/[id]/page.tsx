@@ -33,10 +33,9 @@ export default async function ResourcePage({ params }: PageProps) {
       const resourceType =
         resource.type === "VIDEO"
           ? "video"
-          : resource.type === "PDF"
-            ? "raw"
-            : "image";
-      accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType);
+          : "image";
+      const format = resource.type === "PDF" ? "pdf" : undefined;
+      accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType, format);
     }
   }
 

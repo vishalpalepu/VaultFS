@@ -7,9 +7,7 @@ import mongoose from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI as string;
 
-if (!MONGODB_URI) {
-  throw new Error("MONGODB_URI environment variable is not defined.");
-}
+// Check MONGODB_URI inside connectDB to prevent build/import errors when env var is not set yet
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -30,6 +28,10 @@ const cache: MongooseCache = globalThis.__mongooseCache ?? {
 globalThis.__mongooseCache = cache;
 
 export async function connectDB(): Promise<typeof mongoose> {
+  if (!MONGODB_URI) {
+    throw new Error("MONGODB_URI environment variable is not defined.");
+  }
+
   if (cache.conn) {
     return cache.conn;
   }

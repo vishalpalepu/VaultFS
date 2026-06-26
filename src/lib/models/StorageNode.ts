@@ -37,6 +37,7 @@ const StorageNodeSchema = new Schema<IStorageNodeDoc>(
 
 // Indexes
 StorageNodeSchema.index({ ownerId: 1 });
+StorageNodeSchema.index({ status: 1 });
 
 const StorageNode: Model<IStorageNodeDoc> =
   models.StorageNode || mongoose.model<IStorageNodeDoc>("StorageNode", StorageNodeSchema);

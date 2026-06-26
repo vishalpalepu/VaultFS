@@ -25,7 +25,7 @@ function getCloudinaryResourceType(type: ResourceType): "image" | "video" | "raw
     case "VIDEO":
       return "video";
     case "PDF":
-      return "raw";
+      return "image";
     case "IMAGE":
       return "image";
     default:

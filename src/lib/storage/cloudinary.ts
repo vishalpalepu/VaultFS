@@ -36,7 +36,11 @@ export async function pingNode(node: {
 }): Promise<boolean> {
   try {
     const cld = getCloudinaryInstance(node);
-    const result = await cld.api.ping();
+    const result = await cld.api.ping({
+      cloud_name: node.cloudName,
+      api_key: node.apiKey,
+      api_secret: node.apiSecret,
+    });
     return result?.status === "ok";
   } catch {
     return false;
@@ -64,11 +68,15 @@ export async function uploadToCloudinary(
   const cld = getCloudinaryInstance(node);
 
   return new Promise((resolve, reject) => {
-    const uploadStream = cld.uploader.upload_stream(
+    const uploadStream = cld.uploader.upload_chunked_stream(
       {
         folder: options.folder || "vaultfs",
         resource_type: options.resource_type || "auto",
         public_id: options.public_id,
+        cloud_name: node.cloudName,
+        api_key: node.apiKey,
+        api_secret: node.apiSecret,
+        chunk_size: 6000000, // 6MB chunks to prevent HTTP 413 Payload Too Large on Cloudinary servers
       },
       (error, result) => {
         if (error) return reject(error);
@@ -97,7 +105,10 @@ export async function deleteFromCloudinary(
   const cld = getCloudinaryInstance(node);
   await cld.uploader.destroy(publicId, {
     resource_type: resourceType,
-  });
+    cloud_name: node.cloudName,
+    api_key: node.apiKey,
+    api_secret: node.apiSecret,
+  } as any);
 }
 
 /**
@@ -106,14 +117,26 @@ export async function deleteFromCloudinary(
 export function getCloudinaryUrl(
   node: { cloudName: string; apiKey: string; apiSecret: string },
   publicId: string,
-  resourceType: string = "image"
+  resourceType: string = "image",
+  format?: string
 ): string {
   const cld = getCloudinaryInstance(node);
+  const creds: Record<string, any> = {
+    cloud_name: node.cloudName,
+    api_key: node.apiKey,
+    api_secret: node.apiSecret,
+    secure: true,
+  };
+
+  if (format) {
+    creds.format = format;
+  }
+
   if (resourceType === "video") {
-    return cld.url(publicId, { resource_type: "video", secure: true });
+    return cld.url(publicId, { resource_type: "video", ...creds });
   }
   if (resourceType === "raw") {
-    return cld.url(publicId, { resource_type: "raw", secure: true });
+    return cld.url(publicId, { resource_type: "raw", ...creds });
   }
-  return cld.url(publicId, { secure: true });
+  return cld.url(publicId, creds);
 }

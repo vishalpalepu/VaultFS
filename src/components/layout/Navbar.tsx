@@ -4,12 +4,27 @@ import React from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "../ui/Button";
 
-export const Navbar: React.FC = () => {
+interface NavbarProps {
+  onToggleSidebar?: () => void;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const { data: session } = useSession();
 
   return (
     <header className="h-16 border-b border-neutral-800 bg-neutral-900/50 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-3">
+        {onToggleSidebar && (
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden p-1.5 text-neutral-400 hover:text-white hover:bg-neutral-800 rounded-lg transition-colors cursor-pointer"
+            aria-label="Toggle Sidebar"
+          >
+            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        )}
         <div className="bg-blue-600 p-1.5 rounded-lg text-white font-bold tracking-wider text-sm shadow-md shadow-blue-500/25">
           VFS
         </div>

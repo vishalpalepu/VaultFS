@@ -6,6 +6,7 @@
 import { connectDB } from "@/lib/db/mongoose";
 import StorageNode, { IStorageNodeDoc } from "@/lib/models/StorageNode";
 import StorageLease from "@/lib/models/StorageLease";
+import { pingNode } from "@/lib/storage/cloudinary";
 
 const HEALTH_SCORES: Record<string, number> = {
   ACTIVE: 100,
@@ -64,17 +65,23 @@ export async function selectStorageNode(
     throw new Error("No active storage nodes available.");
   }
 
-  // 7. Score and select highest
-  let bestNode = eligible[0];
-  let bestScore = calculateScore(bestNode);
+  // 7. Score and sort highest first
+  const sortedEligible = eligible.sort((a, b) => calculateScore(b) - calculateScore(a));
 
-  for (let i = 1; i < eligible.length; i++) {
-    const score = calculateScore(eligible[i]);
-    if (score > bestScore) {
-      bestScore = score;
-      bestNode = eligible[i];
+  for (const node of sortedEligible) {
+    const isHealthy = await pingNode({
+      cloudName: node.cloudName,
+      apiKey: node.apiKey,
+      apiSecret: node.apiSecret,
+    });
+
+    if (isHealthy) {
+      return node;
+    } else {
+      // Mark invalid/failing node as OFFLINE so it is taken out of rotation
+      await StorageNode.updateOne({ _id: node._id }, { $set: { status: "OFFLINE", active: false } });
     }
   }
 
-  return bestNode;
+  throw new Error("No active and healthy storage nodes available. Please check your Cloudinary credentials.");
 }

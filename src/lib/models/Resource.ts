@@ -60,6 +60,7 @@ const ResourceSchema = new Schema<IResourceDoc>(
 
 // Indexes
 ResourceSchema.index({ ownerId: 1, folderId: 1 });
+ResourceSchema.index({ ownerId: 1, visibility: 1 });
 ResourceSchema.index(
   { title: "text", description: "text", tags: "text", "metadata.noteContent": "text" },
   { name: "resource_text_search" }

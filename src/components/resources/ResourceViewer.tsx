@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -19,12 +20,18 @@ interface ResourceViewerProps {
 }
 
 export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
+  const router = useRouter();
   const [links, setLinks] = useState<{ outgoing: any[]; incoming: any[] }>({ outgoing: [], incoming: [] });
   const [allResources, setAllResources] = useState<IResource[]>([]);
   const [selectedTargetId, setSelectedTargetId] = useState("");
   const [relationType, setRelationType] = useState<RelationType>("REFERENCES");
   const [linkingLoading, setLinkingLoading] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Note editing state
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [editedNoteContent, setEditedNoteContent] = useState(resource.metadata?.noteContent || "");
+  const [savingNote, setSavingNote] = useState(false);
 
   useEffect(() => {
     async function fetchLinks() {
@@ -84,6 +91,30 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
     }
   };
 
+  const handleSaveNote = async () => {
+    setSavingNote(true);
+    try {
+      const res = await fetch(`/api/resources/${resource._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          metadata: { ...resource.metadata, noteContent: editedNoteContent },
+        }),
+      });
+      if (res.ok) {
+        setIsEditingNote(false);
+        router.refresh();
+      } else {
+        alert("Failed to save note.");
+      }
+    } catch (err) {
+      console.error("Failed to save note:", err);
+      alert("Failed to save note.");
+    } finally {
+      setSavingNote(false);
+    }
+  };
+
   const renderViewer = () => {
     const url = resource.accessUrl || resource.metadata?.externalUrl || "";
 
@@ -95,6 +126,31 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
       case "IMAGE":
         return <ImageViewer url={url} title={resource.title} />;
       case "NOTE":
+        if (isEditingNote) {
+          return (
+            <Card className="p-6 bg-neutral-900 border-neutral-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-white uppercase tracking-wider">Edit Markdown Note</h3>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => setIsEditingNote(false)} disabled={savingNote}>
+                    Cancel
+                  </Button>
+                  <Button size="sm" onClick={handleSaveNote} loading={savingNote}>
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+              <textarea
+                value={editedNoteContent}
+                onChange={(e) => setEditedNoteContent(e.target.value)}
+                disabled={savingNote}
+                rows={15}
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-lg p-4 text-sm text-neutral-200 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="# Write your markdown note here..."
+              />
+            </Card>
+          );
+        }
         return <NoteViewer content={resource.metadata?.noteContent || ""} />;
       case "YOUTUBE":
         return <YoutubeViewer url={resource.metadata?.youtubeUrl || ""} />;
@@ -141,6 +197,14 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
                 Created on {new Date(resource.createdAt).toLocaleString()}
               </p>
             </div>
+            {resource.type === "NOTE" && !isEditingNote && (
+              <Button size="sm" variant="secondary" onClick={() => setIsEditingNote(true)} className="flex items-center gap-1.5 text-xs">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit Note
+              </Button>
+            )}
           </div>
 
           {resource.description && (

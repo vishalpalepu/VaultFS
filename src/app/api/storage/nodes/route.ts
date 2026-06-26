@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
     });
 
     return ok(node, 201);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Create storage node error:", error);
-    return err("Internal server error.", 500);
+    return err(error.message || "Internal server error.", 400);
   }
 }
 

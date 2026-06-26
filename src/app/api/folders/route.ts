@@ -4,7 +4,7 @@
 
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth/auth";
-import { createFolder, getRootFolders } from "@/lib/services/folderService";
+import { createFolder, getRootFolders, getFolderTree } from "@/lib/services/folderService";
 import { ok, err } from "@/lib/utils/api";
 
 export async function POST(req: NextRequest) {
@@ -23,10 +23,16 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const session = await auth();
     if (!session?.user?.id) return err("Unauthorized", 401);
+
+    const isTree = req.nextUrl.searchParams.get("tree") === "true";
+    if (isTree) {
+      const tree = await getFolderTree(session.user.id);
+      return ok(tree);
+    }
 
     const folders = await getRootFolders(session.user.id);
     return ok(folders);

@@ -17,6 +17,18 @@ interface CreateNodeInput {
 
 export async function createNode(input: CreateNodeInput): Promise<IStorageNodeDoc> {
   await connectDB();
+
+  // Pre-validate credentials before saving
+  const isValid = await pingNode({
+    cloudName: input.cloudName,
+    apiKey: input.apiKey,
+    apiSecret: input.apiSecret,
+  });
+
+  if (!isValid) {
+    throw new Error("Invalid Cloudinary credentials. Please verify your Cloud Name, API Key, and API Secret.");
+  }
+
   const node = await StorageNode.create({
     ownerId: input.ownerId,
     cloudName: input.cloudName,

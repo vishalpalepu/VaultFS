@@ -34,10 +34,9 @@ export async function GET(req: NextRequest, { params }: Params) {
         const resourceType =
           resource.type === "VIDEO"
             ? "video"
-            : resource.type === "PDF"
-              ? "raw"
-              : "image";
-        accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType);
+            : "image";
+        const format = resource.type === "PDF" ? "pdf" : undefined;
+        accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType, format);
       }
     }
 
@@ -88,7 +87,7 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       const node = await getNodeById(resource.storageNodeId.toString());
       if (node) {
         const resourceType =
-          resource.type === "VIDEO" ? "video" : resource.type === "PDF" ? "raw" : "image";
+          resource.type === "VIDEO" ? "video" : "image";
         try {
           await deleteFromCloudinary(node, resource.metadata.cloudinaryPublicId, resourceType);
         } catch (e) {

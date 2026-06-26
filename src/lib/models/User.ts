@@ -19,8 +19,7 @@ const UserSchema = new Schema<IUserDoc>(
   { timestamps: true }
 );
 
-// Indexes
-UserSchema.index({ email: 1 }, { unique: true });
+// Indexes are defined directly on the schema fields
 
 const User: Model<IUserDoc> = models.User || mongoose.model<IUserDoc>("User", UserSchema);
 export default User;
