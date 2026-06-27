@@ -232,9 +232,9 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
           )}
 
           {resource.hash && (
-            <div className="mt-4 pt-4 border-t border-neutral-800/60 flex items-center justify-between text-xs text-neutral-500">
-              <span>Client-side SHA-256 Hash:</span>
-              <span className="font-mono bg-neutral-950 px-2 py-1 rounded border border-neutral-800 text-[10px] text-blue-400 select-all">
+            <div className="mt-4 pt-4 border-t border-neutral-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-neutral-500 min-w-0">
+              <span className="shrink-0">Client-side SHA-256 Hash:</span>
+              <span className="font-mono bg-neutral-950 px-2 py-1 rounded border border-neutral-800 text-[10px] text-blue-400 select-all break-all overflow-hidden text-ellipsis">
                 {resource.hash}
               </span>
             </div>
