@@ -15,10 +15,17 @@ import type { ResourceType } from "@/types";
 
 const MAX_UPLOAD_SIZE = 500 * 1024 * 1024; // 500 MB
 
-function getResourceTypeFromMime(mimeType: string): ResourceType {
-  if (mimeType.startsWith("image/")) return "IMAGE";
-  if (mimeType.startsWith("video/")) return "VIDEO";
-  if (mimeType === "application/pdf") return "PDF";
+function getResourceTypeFromMime(mimeType: string, fileName: string = ""): ResourceType {
+  const lower = fileName.toLowerCase();
+  if (mimeType.startsWith("video/") || lower.endsWith(".mp4") || lower.endsWith(".mov") || lower.endsWith(".webm") || lower.endsWith(".mkv") || lower.endsWith(".3gp") || lower.endsWith(".avi")) {
+    return "VIDEO";
+  }
+  if (mimeType.startsWith("image/") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".gif") || lower.endsWith(".webp")) {
+    return "IMAGE";
+  }
+  if (mimeType === "application/pdf" || lower.endsWith(".pdf")) {
+    return "PDF";
+  }
   return "IMAGE"; // fallback
 }
 
@@ -69,8 +76,19 @@ export async function POST(req: NextRequest) {
 
     // 2. Upload to Cloudinary
     const buffer = Buffer.from(await file.arrayBuffer());
-    const resourceType = getResourceTypeFromMime(file.type);
+    const resourceType = getResourceTypeFromMime(file.type, file.name);
     const cloudinaryType = getCloudinaryResourceType(resourceType);
+
+    // Enforce Cloudinary constraints
+    if (cloudinaryType === "image" && file.size > 10 * 1024 * 1024) {
+      return err("Image file exceeds maximum limit of 10 MB.", 400);
+    }
+    if (cloudinaryType === "raw" && file.size > 10 * 1024 * 1024) {
+      return err("Raw file exceeds Cloudinary limit of 10 MB.", 400);
+    }
+    if (cloudinaryType === "video" && file.size > 100 * 1024 * 1024) {
+      return err("Video file exceeds Cloudinary limit of 100 MB.", 400);
+    }
 
     const uploadResult = await uploadToCloudinary(node, buffer, {
       folder: `vaultfs/${session.user.id}`,

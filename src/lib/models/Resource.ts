@@ -12,6 +12,9 @@ export interface IResourceMetadataDoc {
   size?: number;
   mimeType?: string;
   cloudName?: string;
+  leased?: boolean;
+  leaseId?: string;
+  providerId?: string;
 }
 
 export interface IResourceDoc extends Document {
@@ -59,6 +62,9 @@ const ResourceSchema = new Schema<IResourceDoc>(
       size: { type: Number },
       mimeType: { type: String },
       cloudName: { type: String },
+      leased: { type: Boolean },
+      leaseId: { type: String },
+      providerId: { type: String },
     },
   },
   { timestamps: true }

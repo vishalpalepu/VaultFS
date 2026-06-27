@@ -28,6 +28,9 @@ interface CreateResourceInput {
     size?: number;
     mimeType?: string;
     cloudName?: string;
+    leased?: boolean;
+    leaseId?: string;
+    providerId?: string;
   };
 }
 
