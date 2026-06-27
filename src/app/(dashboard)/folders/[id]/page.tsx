@@ -252,7 +252,7 @@ export default function FolderDetailsPage() {
         onClose={() => setConfirmDeleteOpen(false)}
         onConfirm={executeDeleteCurrentFolder}
         title="Delete Current Folder"
-        message={`Are you sure you want to delete "${folder.name}" and all of its contents?`}
+        message={`WARNING: Are you sure you want to delete "${folder.name}"? All files and subfolders inside this folder will be permanently deleted. This action cannot be undone.`}
         confirmText="Delete Folder"
         variant="danger"
       />

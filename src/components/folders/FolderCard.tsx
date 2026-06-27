@@ -144,7 +144,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({ folder, onDelete }) => {
         onClose={() => setConfirmOpen(false)}
         onConfirm={() => onDelete && onDelete(folder._id)}
         title="Delete Folder"
-        message={`Are you sure you want to delete folder "${folder.name}" and all of its contents?`}
+        message={`WARNING: Are you sure you want to delete folder "${folder.name}"? All files and subfolders inside this folder will be permanently deleted. This action cannot be undone.`}
         confirmText="Delete"
         variant="danger"
       />

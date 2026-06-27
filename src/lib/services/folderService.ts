@@ -4,6 +4,10 @@
 
 import { connectDB } from "@/lib/db/mongoose";
 import Folder, { IFolderDoc } from "@/lib/models/Folder";
+import Resource from "@/lib/models/Resource";
+import { getNodeById } from "@/lib/services/storageNodeService";
+import { deleteFromCloudinary } from "@/lib/storage/cloudinary";
+import { createEvent } from "./eventLogService";
 
 export async function createFolder(
   ownerId: string,
@@ -57,6 +61,29 @@ export async function deleteFolder(folderId: string, ownerId: string) {
   for (const child of childFolders) {
     await deleteFolder(child._id.toString(), ownerId);
   }
+
+  // Find and delete all resources in this folder
+  const resources = await Resource.find({ folderId, ownerId });
+  for (const resource of resources) {
+    if (resource.storageNodeId && resource.metadata?.cloudinaryPublicId) {
+      const node = await getNodeById(resource.storageNodeId.toString());
+      if (node) {
+        const resourceType =
+          resource.metadata?.cloudinaryResourceType ||
+          (resource.type === "VIDEO" ? "video" : resource.type === "PDF" ? "raw" : "image");
+        try {
+          await deleteFromCloudinary(node, resource.metadata.cloudinaryPublicId, resourceType);
+        } catch (e) {
+          console.warn("Failed to delete from Cloudinary:", e);
+        }
+      }
+    }
+    await Resource.findOneAndDelete({ _id: resource._id, ownerId });
+    await createEvent("RESOURCE_DELETED", ownerId, resource._id.toString(), {
+      type: resource.type,
+    });
+  }
+
   return Folder.findOneAndDelete({ _id: folderId, ownerId });
 }
 
