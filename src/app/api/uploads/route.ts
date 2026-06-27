@@ -9,6 +9,7 @@ import { uploadToCloudinary } from "@/lib/storage/cloudinary";
 import { createResource } from "@/lib/services/resourceService";
 import StorageNode from "@/lib/models/StorageNode";
 import StorageLease from "@/lib/models/StorageLease";
+import Resource from "@/lib/models/Resource";
 import { createEvent } from "@/lib/services/eventLogService";
 import { ok, err } from "@/lib/utils/api";
 import type { ResourceType } from "@/types";
@@ -90,43 +91,7 @@ export async function POST(req: NextRequest) {
       return err("Video file exceeds Cloudinary limit of 100 MB.", 400);
     }
 
-    const uploadResult = await uploadToCloudinary(node, buffer, {
-      folder: `vaultfs/${session.user.id}`,
-      resource_type: cloudinaryType,
-    });
-
-    // 3. Update node used storage
-    const fileSizeGB = file.size / (1024 * 1024 * 1024);
-    await StorageNode.updateOne(
-      { _id: node._id },
-      {
-        $inc: { usedStorageGB: fileSizeGB },
-      }
-    );
-
-    // Check if node is now full
-    const updatedNode = await StorageNode.findById(node._id);
-    if (updatedNode && updatedNode.usedStorageGB >= updatedNode.availableStorageGB) {
-      await StorageNode.updateOne(
-        { _id: node._id },
-        { $set: { status: "FULL", active: false } }
-      );
-    }
-
-    // If leased node, update lease used storage and create event log
-    if (leaseId && providerId) {
-      await StorageLease.updateOne(
-        { _id: leaseId },
-        { $inc: { usedStorageGB: fileSizeGB } }
-      );
-      await createEvent("RESOURCE_CREATED", session.user.id, leaseId, {
-        leasedNode: true,
-        providerId,
-        fileSizeGB,
-      });
-    }
-
-    // 4. Save metadata
+    // 2. Save metadata immediately with uploading: true
     const tags = tagsRaw
       .split(",")
       .map((t) => t.trim())
@@ -143,18 +108,80 @@ export async function POST(req: NextRequest) {
       visibility: visibility as "PRIVATE" | "SHARED",
       hash,
       metadata: {
-        cloudinaryPublicId: uploadResult.publicId,
-        cloudinaryResourceType: uploadResult.resourceType,
-        cloudinaryFormat: uploadResult.format,
-        secureUrl: uploadResult.secureUrl,
         size: file.size,
         mimeType: file.type,
         cloudName: node.cloudName,
         leased: !!leaseId,
         leaseId,
         providerId,
+        uploading: true,
       },
     });
+
+    // 3. Perform upload in the background without blocking the HTTP response
+    const fileSizeGB = file.size / (1024 * 1024 * 1024);
+    const userId = session.user.id;
+    const resourceId = resource._id;
+
+    uploadToCloudinary(node, buffer, {
+      folder: `vaultfs/${userId}`,
+      resource_type: cloudinaryType,
+    })
+      .then(async (uploadResult) => {
+        // Update Resource document with Cloudinary details and uploading: false
+        await Resource.updateOne(
+          { _id: resourceId },
+          {
+            $set: {
+              "metadata.cloudinaryPublicId": uploadResult.publicId,
+              "metadata.cloudinaryResourceType": uploadResult.resourceType,
+              "metadata.cloudinaryFormat": uploadResult.format,
+              "metadata.secureUrl": uploadResult.secureUrl,
+              "metadata.uploading": false,
+            },
+          }
+        );
+
+        // Update node used storage
+        await StorageNode.updateOne(
+          { _id: node._id },
+          { $inc: { usedStorageGB: fileSizeGB } }
+        );
+
+        // Check if node is now full
+        const updatedNode = await StorageNode.findById(node._id);
+        if (updatedNode && updatedNode.usedStorageGB >= updatedNode.availableStorageGB) {
+          await StorageNode.updateOne(
+            { _id: node._id },
+            { $set: { status: "FULL", active: false } }
+          );
+        }
+
+        // If leased node, update lease used storage and create event log
+        if (leaseId && providerId) {
+          await StorageLease.updateOne(
+            { _id: leaseId },
+            { $inc: { usedStorageGB: fileSizeGB } }
+          );
+          await createEvent("RESOURCE_CREATED", userId, leaseId, {
+            leasedNode: true,
+            providerId,
+            fileSizeGB,
+          });
+        }
+      })
+      .catch(async (err) => {
+        console.error("Background upload failed:", err);
+        await Resource.updateOne(
+          { _id: resourceId },
+          {
+            $set: {
+              "metadata.uploading": false,
+              "metadata.uploadError": err?.message || "Cloudinary upload failed",
+            },
+          }
+        );
+      });
 
     return ok(resource, 201);
   } catch (error) {

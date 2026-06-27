@@ -31,6 +31,8 @@ interface CreateResourceInput {
     leased?: boolean;
     leaseId?: string;
     providerId?: string;
+    uploading?: boolean;
+    uploadError?: string;
   };
 }
 

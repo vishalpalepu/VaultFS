@@ -57,6 +57,8 @@ export interface IResourceMetadata {
   leased?: boolean;
   leaseId?: string;
   providerId?: string;
+  uploading?: boolean;
+  uploadError?: string;
 }
 
 export interface IResource {

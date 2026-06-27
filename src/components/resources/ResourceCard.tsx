@@ -81,6 +81,16 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
                     Leased Storage
                   </Badge>
                 )}
+                {resource.metadata?.uploading && (
+                  <Badge variant="info" className="text-[8px] px-1 py-0 uppercase font-mono animate-pulse">
+                    Uploading...
+                  </Badge>
+                )}
+                {resource.metadata?.uploadError && (
+                  <Badge variant="error" className="text-[8px] px-1 py-0 uppercase font-mono">
+                    Upload Failed
+                  </Badge>
+                )}
               </div>
               <h4 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors truncate block">
                 {resource.title}

@@ -15,6 +15,8 @@ export interface IResourceMetadataDoc {
   leased?: boolean;
   leaseId?: string;
   providerId?: string;
+  uploading?: boolean;
+  uploadError?: string;
 }
 
 export interface IResourceDoc extends Document {
@@ -65,6 +67,8 @@ const ResourceSchema = new Schema<IResourceDoc>(
       leased: { type: Boolean },
       leaseId: { type: String },
       providerId: { type: String },
+      uploading: { type: Boolean, default: false },
+      uploadError: { type: String },
     },
   },
   { timestamps: true }

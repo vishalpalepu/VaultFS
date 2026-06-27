@@ -20,6 +20,7 @@ export function getCloudinaryInstance(node: {
     api_key: node.apiKey,
     api_secret: node.apiSecret,
     secure: true,
+    timeout: 600000, // 10 minutes timeout for large video uploads
   };
 
   cloudinary.config(config);
@@ -77,6 +78,7 @@ export async function uploadToCloudinary(
         api_key: node.apiKey,
         api_secret: node.apiSecret,
         chunk_size: 6000000, // 6MB chunks to prevent HTTP 413 Payload Too Large on Cloudinary servers
+        timeout: 600000, // 10 minutes timeout per chunk/stream to prevent HTTP 499 Request Timeout
       },
       (error, result) => {
         console.log("=== CLOUDINARY UPLOAD RESPONSE ===");

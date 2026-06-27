@@ -197,6 +197,16 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
                     Leased Node
                   </Badge>
                 )}
+                {resource.metadata?.uploading && (
+                  <Badge variant="info" className="text-[10px] px-2 uppercase font-mono animate-pulse">
+                    Uploading to Cloud...
+                  </Badge>
+                )}
+                {resource.metadata?.uploadError && (
+                  <Badge variant="error" className="text-[10px] px-2 uppercase font-mono">
+                    Upload Failed: {resource.metadata.uploadError}
+                  </Badge>
+                )}
               </div>
               <p className="text-xs text-neutral-500">
                 Created on {new Date(resource.createdAt).toLocaleString()}
