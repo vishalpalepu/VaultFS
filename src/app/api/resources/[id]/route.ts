@@ -4,6 +4,7 @@
 
 import { NextRequest } from "next/server";
 import { auth } from "@/lib/auth/auth";
+import mongoose from "mongoose";
 import {
   getResourceById,
   updateResource,
@@ -23,6 +24,12 @@ export async function GET(req: NextRequest, { params }: Params) {
     if (!session?.user?.id) return err("Unauthorized", 401);
 
     const { id } = await params;
+
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return err("Invalid resource ID.", 400);
+    }
+
     const resource = await getResourceById(id, session.user.id);
     if (!resource) return err("Resource not found.", 404);
 
@@ -35,8 +42,7 @@ export async function GET(req: NextRequest, { params }: Params) {
           resource.type === "VIDEO"
             ? "video"
             : "image";
-        const format = resource.type === "PDF" ? "pdf" : undefined;
-        accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType, format);
+        accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType);
       }
     }
 

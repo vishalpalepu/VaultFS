@@ -19,6 +19,7 @@ interface CreateResourceInput {
   storageNodeId?: string;
   metadata?: {
     cloudinaryPublicId?: string;
+    secureUrl?: string;
     youtubeUrl?: string;
     externalUrl?: string;
     noteContent?: string;

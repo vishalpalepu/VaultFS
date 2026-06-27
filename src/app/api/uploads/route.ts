@@ -25,7 +25,7 @@ function getCloudinaryResourceType(type: ResourceType): "image" | "video" | "raw
     case "VIDEO":
       return "video";
     case "PDF":
-      return "image";
+      return "raw";
     case "IMAGE":
       return "image";
     default:
@@ -109,6 +109,9 @@ export async function POST(req: NextRequest) {
       hash,
       metadata: {
         cloudinaryPublicId: uploadResult.publicId,
+        cloudinaryResourceType: uploadResult.resourceType,
+        cloudinaryFormat: uploadResult.format,
+        secureUrl: uploadResult.secureUrl,
         size: file.size,
         mimeType: file.type,
         cloudName: node.cloudName,

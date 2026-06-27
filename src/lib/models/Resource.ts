@@ -3,6 +3,9 @@ import type { ResourceType, Visibility } from "@/types";
 
 export interface IResourceMetadataDoc {
   cloudinaryPublicId?: string;
+  cloudinaryResourceType?: string;
+  cloudinaryFormat?: string;
+  secureUrl?: string;
   youtubeUrl?: string;
   externalUrl?: string;
   noteContent?: string;
@@ -47,6 +50,9 @@ const ResourceSchema = new Schema<IResourceDoc>(
     hash: { type: String },
     metadata: {
       cloudinaryPublicId: { type: String },
+      cloudinaryResourceType: { type: String },
+      cloudinaryFormat: { type: String },
+      secureUrl: { type: String },
       youtubeUrl: { type: String },
       externalUrl: { type: String },
       noteContent: { type: String },

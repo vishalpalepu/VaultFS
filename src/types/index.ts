@@ -45,6 +45,9 @@ export interface IFolder {
 
 export interface IResourceMetadata {
   cloudinaryPublicId?: string;
+  cloudinaryResourceType?: string;
+  cloudinaryFormat?: string;
+  secureUrl?: string;
   youtubeUrl?: string;
   externalUrl?: string;
   noteContent?: string;

@@ -6,6 +6,7 @@ import { getNodeById } from "@/lib/services/storageNodeService";
 import { getCloudinaryUrl } from "@/lib/storage/cloudinary";
 import { ResourceViewer } from "@/components/resources/ResourceViewer";
 import Link from "next/link";
+import mongoose from "mongoose";
 import type { IResource } from "@/types";
 
 interface PageProps {
@@ -19,6 +20,12 @@ export default async function ResourcePage({ params }: PageProps) {
   const userId = session!.user.id;
 
   const { id } = await params;
+
+  // Validate ObjectId format to prevent CastError
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    notFound();
+  }
+
   const resource = await getResourceById(id, userId);
 
   if (!resource) {
@@ -27,42 +34,48 @@ export default async function ResourcePage({ params }: PageProps) {
 
   // Generate secure Cloudinary URL if applicable
   let accessUrl: string | undefined;
-  if (resource.storageNodeId && resource.metadata?.cloudinaryPublicId) {
+
+  // For PDFs, prefer the stored secureUrl from Cloudinary (direct iframe-compatible URL)
+  if (resource.type === "PDF" && resource.metadata?.secureUrl) {
+    accessUrl = resource.metadata.secureUrl;
+  } else if (resource.storageNodeId && resource.metadata?.cloudinaryPublicId) {
     const node = await getNodeById(resource.storageNodeId.toString());
     if (node) {
       const resourceType =
         resource.type === "VIDEO"
           ? "video"
           : "image";
-      const format = resource.type === "PDF" ? "pdf" : undefined;
-      accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType, format);
+      accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType);
     }
   }
 
-  // Format to match serializable structure
+  // Serialize to plain object - JSON round-trip ensures no Mongoose/BSON objects remain
+  const plainResource = JSON.parse(JSON.stringify(resource));
+
   const serializedResource: IResource & { accessUrl?: string } = {
-    _id: resource._id.toString(),
-    ownerId: resource.ownerId.toString(),
-    folderId: resource.folderId.toString(),
-    storageNodeId: resource.storageNodeId ? resource.storageNodeId.toString() : null,
-    type: resource.type,
-    title: resource.title,
-    description: resource.description,
-    tags: resource.tags,
-    visibility: resource.visibility,
-    hash: resource.hash,
+    _id: String(plainResource._id),
+    ownerId: String(plainResource.ownerId),
+    folderId: String(plainResource.folderId),
+    storageNodeId: plainResource.storageNodeId ? String(plainResource.storageNodeId) : null,
+    type: plainResource.type,
+    title: plainResource.title,
+    description: plainResource.description,
+    tags: plainResource.tags || [],
+    visibility: plainResource.visibility,
+    hash: plainResource.hash,
     metadata: {
-      cloudinaryPublicId: resource.metadata?.cloudinaryPublicId,
-      youtubeUrl: resource.metadata?.youtubeUrl,
-      externalUrl: resource.metadata?.externalUrl,
-      noteContent: resource.metadata?.noteContent,
-      size: resource.metadata?.size,
-      mimeType: resource.metadata?.mimeType,
-      cloudName: resource.metadata?.cloudName,
+      cloudinaryPublicId: plainResource.metadata?.cloudinaryPublicId,
+      secureUrl: plainResource.metadata?.secureUrl,
+      youtubeUrl: plainResource.metadata?.youtubeUrl,
+      externalUrl: plainResource.metadata?.externalUrl,
+      noteContent: plainResource.metadata?.noteContent,
+      size: plainResource.metadata?.size,
+      mimeType: plainResource.metadata?.mimeType,
+      cloudName: plainResource.metadata?.cloudName,
     },
     accessUrl,
-    createdAt: resource.createdAt.toISOString(),
-    updatedAt: resource.updatedAt.toISOString(),
+    createdAt: plainResource.createdAt,
+    updatedAt: plainResource.updatedAt,
   };
 
   return (
