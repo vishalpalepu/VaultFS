@@ -147,11 +147,23 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
         const ctx = targetCanvas.getContext("2d");
         if (!ctx) return;
 
-        const currentScale = modalMode ? modalScale : scale;
         const containerWidth = targetContainer.clientWidth;
+        const containerHeight = targetContainer.clientHeight || window.innerHeight - 150;
         const unscaledViewport = page.getViewport({ scale: 1 });
-        const fitScale = (containerWidth - (modalMode ? 48 : 32)) / unscaledViewport.width;
-        const effectiveScale = Math.min(currentScale, fitScale);
+
+        let effectiveScale;
+        if (modalMode) {
+          const fitWidthScale = (containerWidth - 48) / unscaledViewport.width;
+          const fitHeightScale = (containerHeight - 48) / unscaledViewport.height;
+          const bestFit = Math.min(fitWidthScale, fitHeightScale);
+          effectiveScale = modalScale === 1.5 ? Math.max(bestFit, 1.5) : modalScale;
+          if (modalScale === 1.5 && effectiveScale !== 1.5) {
+            setTimeout(() => setModalScale(effectiveScale), 0);
+          }
+        } else {
+          const fitScale = (containerWidth - 32) / unscaledViewport.width;
+          effectiveScale = Math.min(scale, fitScale);
+        }
 
         const viewport = page.getViewport({ scale: effectiveScale });
 

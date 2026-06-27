@@ -13,12 +13,20 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ url }) => {
         </span>
       </div>
       <div className="relative aspect-video bg-black flex items-center justify-center">
-        <video
-          src={url}
-          controls
-          className="w-full h-full max-h-[600px] object-contain focus:outline-none"
-          preload="metadata"
-        />
+        {url ? (
+          <video
+            src={url}
+            controls
+            className="w-full h-full max-h-[600px] object-contain focus:outline-none"
+            preload="metadata"
+          />
+        ) : (
+          <div className="flex flex-col items-center justify-center space-y-3 p-8 text-center text-neutral-400">
+            <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-sm font-medium">Video is uploading and processing in the background...</p>
+            <p className="text-xs text-neutral-500">The player will be available once the cloud stream is ready.</p>
+          </div>
+        )}
       </div>
     </div>
   );

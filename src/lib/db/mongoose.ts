@@ -40,8 +40,15 @@ export async function connectDB(): Promise<typeof mongoose> {
     cache.promise = mongoose
       .connect(MONGODB_URI, {
         bufferCommands: false,
+        serverSelectionTimeoutMS: 5000, // Fail early (5s) instead of hanging for 30s
+        socketTimeoutMS: 45000, // Keep socket open longer for large operations
+        family: 4, // Use IPv4, skip IPv6 to prevent getaddrinfo ENOTFOUND DNS issues
       })
-      .then((m) => m);
+      .then((m) => m)
+      .catch((err) => {
+        cache.promise = null; // Clear cached promise so subsequent requests can retry
+        throw err;
+      });
   }
 
   cache.conn = await cache.promise;
