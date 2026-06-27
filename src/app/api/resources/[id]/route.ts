@@ -35,13 +35,14 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     // Generate access URL if stored on Cloudinary
     let accessUrl: string | null = null;
-    if (resource.storageNodeId && resource.metadata?.cloudinaryPublicId) {
+    if (resource.type === "PDF") {
+      accessUrl = `/api/resources/${resource._id}/content`;
+    } else if (resource.storageNodeId && resource.metadata?.cloudinaryPublicId) {
       const node = await getNodeById(resource.storageNodeId.toString());
       if (node) {
         const resourceType =
-          resource.type === "VIDEO"
-            ? "video"
-            : "image";
+          resource.metadata?.cloudinaryResourceType ||
+          (resource.type === "VIDEO" ? "video" : "image");
         accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType);
       }
     }
@@ -93,7 +94,8 @@ export async function DELETE(req: NextRequest, { params }: Params) {
       const node = await getNodeById(resource.storageNodeId.toString());
       if (node) {
         const resourceType =
-          resource.type === "VIDEO" ? "video" : "image";
+          resource.metadata?.cloudinaryResourceType ||
+          (resource.type === "VIDEO" ? "video" : resource.type === "PDF" ? "raw" : "image");
         try {
           await deleteFromCloudinary(node, resource.metadata.cloudinaryPublicId, resourceType);
         } catch (e) {

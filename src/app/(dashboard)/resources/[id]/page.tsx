@@ -35,16 +35,14 @@ export default async function ResourcePage({ params }: PageProps) {
   // Generate secure Cloudinary URL if applicable
   let accessUrl: string | undefined;
 
-  // For PDFs, prefer the stored secureUrl from Cloudinary (direct iframe-compatible URL)
-  if (resource.type === "PDF" && resource.metadata?.secureUrl) {
-    accessUrl = resource.metadata.secureUrl;
+  if (resource.type === "PDF") {
+    accessUrl = `/api/resources/${id}/content`;
   } else if (resource.storageNodeId && resource.metadata?.cloudinaryPublicId) {
     const node = await getNodeById(resource.storageNodeId.toString());
     if (node) {
       const resourceType =
-        resource.type === "VIDEO"
-          ? "video"
-          : "image";
+        resource.metadata?.cloudinaryResourceType ||
+        (resource.type === "VIDEO" ? "video" : "image");
       accessUrl = getCloudinaryUrl(node, resource.metadata.cloudinaryPublicId, resourceType);
     }
   }
@@ -65,6 +63,8 @@ export default async function ResourcePage({ params }: PageProps) {
     hash: plainResource.hash,
     metadata: {
       cloudinaryPublicId: plainResource.metadata?.cloudinaryPublicId,
+      cloudinaryResourceType: plainResource.metadata?.cloudinaryResourceType,
+      cloudinaryFormat: plainResource.metadata?.cloudinaryFormat,
       secureUrl: plainResource.metadata?.secureUrl,
       youtubeUrl: plainResource.metadata?.youtubeUrl,
       externalUrl: plainResource.metadata?.externalUrl,
