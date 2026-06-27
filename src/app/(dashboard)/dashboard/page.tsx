@@ -146,7 +146,16 @@ export default async function DashboardPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {recentResources.map((res: any) => (
-                <ResourceCard key={res._id.toString()} resource={{ ...res, _id: res._id.toString() }} />
+                <ResourceCard
+                  key={res._id.toString()}
+                  resource={{
+                    ...res,
+                    _id: res._id?.toString(),
+                    ownerId: res.ownerId?.toString(),
+                    folderId: res.folderId?.toString(),
+                    storageNodeId: res.storageNodeId?.toString(),
+                  }}
+                />
               ))}
             </div>
           )}

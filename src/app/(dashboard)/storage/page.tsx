@@ -7,6 +7,7 @@ import { NodeCard } from "@/components/storage/NodeCard";
 import { LeaseCard } from "@/components/storage/LeaseCard";
 import { AddNodeModal } from "@/components/storage/AddNodeModal";
 import { LeaseRequestModal } from "@/components/storage/LeaseRequestModal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import type { IStorageNode, IStorageLease } from "@/types";
 
 export default function StorageSettingsPage() {
@@ -16,6 +17,7 @@ export default function StorageSettingsPage() {
   const [nodes, setNodes] = useState<IStorageNode[]>([]);
   const [nodesLoading, setNodesLoading] = useState(true);
   const [addNodeOpen, setAddNodeOpen] = useState(false);
+  const [healthSuccessOpen, setHealthSuccessOpen] = useState(false);
 
   // Leases state
   const [leases, setLeases] = useState<{ asProvider: IStorageLease[]; asConsumer: IStorageLease[] }>({
@@ -77,7 +79,7 @@ export default function StorageSettingsPage() {
       const res = await fetch("/api/storage/health");
       const json = await res.json();
       if (json.success) {
-        alert("Health checks triggered successfully!");
+        setHealthSuccessOpen(true);
         fetchNodes();
       }
     } catch (err) {
@@ -238,6 +240,16 @@ export default function StorageSettingsPage() {
         isOpen={requestLeaseOpen}
         onClose={() => setRequestLeaseOpen(false)}
         onRequested={fetchLeases}
+      />
+
+      <ConfirmModal
+        isOpen={healthSuccessOpen}
+        onClose={() => setHealthSuccessOpen(false)}
+        onConfirm={() => setHealthSuccessOpen(false)}
+        title="Health Check Complete"
+        message="Health checks triggered successfully! All storage nodes have been verified."
+        confirmText="OK"
+        variant="primary"
       />
     </div>
   );
