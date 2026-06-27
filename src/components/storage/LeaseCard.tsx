@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
+import { ConfirmModal } from "../ui/ConfirmModal";
 import type { IStorageLease } from "@/types";
 
 interface LeaseCardProps {
@@ -20,6 +21,7 @@ export const LeaseCard: React.FC<LeaseCardProps> = ({
   onRevoked,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const getStatusVariant = () => {
     switch (lease.status) {
@@ -128,11 +130,7 @@ export const LeaseCard: React.FC<LeaseCardProps> = ({
       {lease.status === "ACTIVE" && mode === "provider" && (
         <div className="flex gap-2 pt-2">
           <Button
-            onClick={() => {
-              if (confirm("Are you sure you want to revoke this active storage lease?")) {
-                handleRevoke();
-              }
-            }}
+            onClick={() => setConfirmOpen(true)}
             variant="danger"
             loading={loading}
             className="w-full text-xs py-1.5"
@@ -141,6 +139,16 @@ export const LeaseCard: React.FC<LeaseCardProps> = ({
           </Button>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleRevoke}
+        title="Revoke Storage Lease"
+        message="Are you sure you want to revoke this active storage lease?"
+        confirmText="Revoke Lease"
+        variant="danger"
+      />
     </Card>
   );
 };

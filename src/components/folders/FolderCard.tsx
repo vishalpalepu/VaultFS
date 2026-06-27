@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "../ui/Card";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
+import { ConfirmModal } from "../ui/ConfirmModal";
 import type { IFolder } from "@/types";
 
 interface FolderCardProps {
@@ -18,6 +19,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({ folder, onDelete }) => {
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(folder.name);
   const [saving, setSaving] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleRename = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,9 +122,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({ folder, onDelete }) => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              if (confirm(`Are you sure you want to delete folder "${folder.name}" and all of its contents?`)) {
-                onDelete(folder._id);
-              }
+              setConfirmOpen(true);
             }}
             className="p-2 text-neutral-500 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-all cursor-pointer"
             title="Delete Folder"
@@ -138,6 +138,16 @@ export const FolderCard: React.FC<FolderCardProps> = ({ folder, onDelete }) => {
           </button>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => onDelete && onDelete(folder._id)}
+        title="Delete Folder"
+        message={`Are you sure you want to delete folder "${folder.name}" and all of its contents?`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </Card>
   );
 };

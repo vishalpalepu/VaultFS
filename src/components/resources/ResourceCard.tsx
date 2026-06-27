@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
+import { ConfirmModal } from "../ui/ConfirmModal";
 import type { IResource } from "@/types";
 
 interface ResourceCardProps {
@@ -12,6 +13,8 @@ interface ResourceCardProps {
 }
 
 export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }) => {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const getResourceIcon = () => {
     switch (resource.type) {
       case "PDF":
@@ -83,9 +86,7 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (confirm(`Are you sure you want to delete this resource?`)) {
-                  onDelete(resource._id);
-                }
+                setConfirmOpen(true);
               }}
               className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-all opacity-60 group-hover:opacity-100 focus:opacity-100 cursor-pointer relative z-10"
               title="Delete Resource"
@@ -138,6 +139,16 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
       <Link href={`/resources/${resource._id}`} className="absolute inset-0 z-0">
         <span className="sr-only">View Resource</span>
       </Link>
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => onDelete && onDelete(resource._id)}
+        title="Delete Resource"
+        message={`Are you sure you want to delete "${resource.title}"?`}
+        confirmText="Delete"
+        variant="danger"
+      />
     </Card>
   );
 };

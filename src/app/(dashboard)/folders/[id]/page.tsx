@@ -10,6 +10,7 @@ import { ResourceCard } from "@/components/resources/ResourceCard";
 import { CreateFolderModal } from "@/components/folders/CreateFolderModal";
 import { UploadModal } from "@/components/resources/UploadModal";
 import { CreateResourceModal } from "@/components/resources/CreateResourceModal";
+import { ConfirmModal } from "@/components/ui/ConfirmModal";
 import type { IFolder, IResource } from "@/types";
 
 export default function FolderDetailsPage() {
@@ -26,6 +27,7 @@ export default function FolderDetailsPage() {
   const [subfolderModalOpen, setSubfolderModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [resourceModalOpen, setResourceModalOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const fetchFolderContents = async () => {
     setLoading(true);
@@ -82,21 +84,19 @@ export default function FolderDetailsPage() {
     }
   };
 
-  const handleDeleteCurrentFolder = async () => {
+  const executeDeleteCurrentFolder = async () => {
     if (!folder) return;
-    if (confirm(`Are you sure you want to delete the folder "${folder.name}" and all of its contents?`)) {
-      try {
-        const res = await fetch(`/api/folders/${folder._id}`, { method: "DELETE" });
-        const json = await res.json();
-        if (json.success) {
-          router.push(folder.parentId ? `/folders/${folder.parentId}` : "/folders");
-        } else {
-          alert("Failed to delete folder.");
-        }
-      } catch (err) {
-        console.error(err);
+    try {
+      const res = await fetch(`/api/folders/${folder._id}`, { method: "DELETE" });
+      const json = await res.json();
+      if (json.success) {
+        router.push(folder.parentId ? `/folders/${folder.parentId}` : "/folders");
+      } else {
         alert("Failed to delete folder.");
       }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete folder.");
     }
   };
 
@@ -157,7 +157,7 @@ export default function FolderDetailsPage() {
           <Button
             variant="secondary"
             size="sm"
-            onClick={handleDeleteCurrentFolder}
+            onClick={() => setConfirmDeleteOpen(true)}
             className="text-xs text-red-400 hover:text-red-300 hover:bg-neutral-800 flex items-center gap-1.5"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -245,6 +245,16 @@ export default function FolderDetailsPage() {
         onClose={() => setResourceModalOpen(false)}
         folderId={folderId}
         onCreated={(newRes) => setResources((prev) => [newRes, ...prev])}
+      />
+
+      <ConfirmModal
+        isOpen={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
+        onConfirm={executeDeleteCurrentFolder}
+        title="Delete Current Folder"
+        message={`Are you sure you want to delete "${folder.name}" and all of its contents?`}
+        confirmText="Delete Folder"
+        variant="danger"
       />
     </div>
   );

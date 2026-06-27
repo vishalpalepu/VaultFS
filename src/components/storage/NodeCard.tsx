@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Card } from "../ui/Card";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
+import { ConfirmModal } from "../ui/ConfirmModal";
 import type { IStorageNode } from "@/types";
 
 interface NodeCardProps {
@@ -15,6 +16,7 @@ interface NodeCardProps {
 export const NodeCard: React.FC<NodeCardProps> = ({ node, onDisable, onUpdated }) => {
   const [updating, setUpdating] = useState(false);
   const [availableStorage, setAvailableStorage] = useState(node.availableStorageGB);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const getStatusVariant = () => {
     switch (node.status) {
@@ -131,17 +133,23 @@ export const NodeCard: React.FC<NodeCardProps> = ({ node, onDisable, onUpdated }
           <Button
             variant="danger"
             size="sm"
-            onClick={() => {
-              if (confirm("Are you sure you want to disable this node? This will block new uploads to it.")) {
-                onDisable(node._id);
-              }
-            }}
+            onClick={() => setConfirmOpen(true)}
             className="text-xs shrink-0"
           >
             Disable Node
           </Button>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => onDisable(node._id)}
+        title="Disable Storage Node"
+        message="Are you sure you want to disable this node? This will block new uploads to it."
+        confirmText="Disable Node"
+        variant="danger"
+      />
     </Card>
   );
 };
