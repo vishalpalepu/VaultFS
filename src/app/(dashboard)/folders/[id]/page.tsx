@@ -90,7 +90,7 @@ export default function FolderDetailsPage() {
       const res = await fetch(`/api/folders/${folder._id}`, { method: "DELETE" });
       const json = await res.json();
       if (json.success) {
-        router.push(folder.parentId ? `/folders/${folder.parentId}` : "/folders");
+        router.push(folder.parentFolderId ? `/folders/${folder.parentFolderId}` : "/folders");
       } else {
         alert("Failed to delete folder.");
       }
