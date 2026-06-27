@@ -408,59 +408,60 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
 
       {/* In-App Modal Preview */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-neutral-950/95 backdrop-blur-md">
+        <div className="fixed inset-0 z-[100] flex flex-col bg-neutral-950/95 backdrop-blur-xl w-full h-full overflow-hidden">
           {/* Modal Toolbar */}
-          <div className="bg-neutral-900 px-4 py-3 border-b border-neutral-800 flex items-center justify-between gap-4 shadow-lg shrink-0">
-            <div className="flex items-center gap-3 min-w-0">
+          <div className="flex items-center justify-between px-3 sm:px-6 py-3 bg-neutral-900/90 backdrop-blur-md border-b border-neutral-800/80 sticky top-0 z-50 shadow-lg shrink-0 w-full">
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0 max-w-[45%] sm:max-w-md">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg bg-neutral-800 text-neutral-400 hover:text-white hover:bg-neutral-700 transition-colors"
+                className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white transition-all shadow shrink-0"
                 title="Close Preview"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              <h3 className="text-sm font-semibold text-white truncate">{title || "In-App PDF Preview"}</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white truncate">{title || "PDF Preview"}</h3>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Zoom controls */}
-              <button
-                onClick={zoomOut}
-                disabled={modalScale <= 0.5 || loading || !!error}
-                className="p-1.5 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Zoom out"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 12H4" />
-                </svg>
-              </button>
-              <span className="text-xs text-neutral-400 font-mono min-w-[3.5rem] text-center tabular-nums">
-                {Math.round(modalScale * 100)}%
-              </span>
-              <button
-                onClick={zoomIn}
-                disabled={modalScale >= 4 || loading || !!error}
-                className="p-1.5 rounded-md bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Zoom in"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                </svg>
-              </button>
+            <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+              {/* Integrated Zoom Pill */}
+              <div className="flex items-center bg-neutral-950/80 border border-neutral-800 rounded-full px-1.5 py-1 shadow-inner">
+                <button
+                  onClick={zoomOut}
+                  disabled={modalScale <= 0.5 || loading || !!error}
+                  className="w-6 h-6 flex items-center justify-center rounded-full bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Zoom out"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M20 12H4" />
+                  </svg>
+                </button>
+                <span className="text-[11px] sm:text-xs text-neutral-300 font-mono w-11 sm:w-12 text-center tabular-nums font-semibold">
+                  {Math.round(modalScale * 100)}%
+                </span>
+                <button
+                  onClick={zoomIn}
+                  disabled={modalScale >= 4 || loading || !!error}
+                  className="w-6 h-6 flex items-center justify-center rounded-full bg-neutral-900 text-neutral-300 hover:bg-neutral-800 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  title="Zoom in"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+              </div>
 
-              <div className="w-px h-5 bg-neutral-700 mx-1 hidden sm:block" />
-
+              {/* Open in New Tab Button */}
               <a
                 href={url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium flex items-center gap-1.5 p-1.5 rounded-md hover:bg-neutral-800"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-400 hover:text-blue-300 text-xs font-semibold transition-all shadow-sm"
                 title="Open in New Tab"
               >
-                <span>Open in New Tab</span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <span className="hidden sm:inline">Open in New Tab</span>
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>
@@ -470,7 +471,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
           {/* Modal PDF Canvas Area */}
           <div
             ref={modalContainerRef}
-            className="flex-1 overflow-auto bg-neutral-950 flex justify-center items-start p-2 sm:p-6"
+            className="flex-1 overflow-auto bg-neutral-950/95 flex justify-center items-center p-2 sm:p-6 w-full"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             {loading && (
@@ -493,29 +494,31 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
             )}
 
             {!loading && !error && (
-              <canvas
-                ref={modalCanvasRef}
-                className="block mx-auto rounded-lg shadow-2xl border border-neutral-800"
-                style={{ maxWidth: "100%" }}
-              />
+              <div className="max-h-[80vh] flex items-center justify-center w-full">
+                <canvas
+                  ref={modalCanvasRef}
+                  className="block mx-auto rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] border border-neutral-800/80 object-contain max-h-[80vh]"
+                  style={{ maxWidth: "100%" }}
+                />
+              </div>
             )}
           </div>
 
           {/* Modal Bottom Pagination Bar */}
           {!loading && !error && totalPages > 0 && (
-            <div className="bg-neutral-900 px-4 py-3 border-t border-neutral-800 flex items-center justify-center gap-3 shadow-lg shrink-0">
+            <div className="flex items-center justify-center px-4 py-3 bg-neutral-900/90 backdrop-blur-md border-t border-neutral-800/80 sticky bottom-0 z-50 shadow-xl shrink-0 gap-3 w-full">
               <button
                 onClick={goToPrev}
                 disabled={currentPage <= 1 || rendering}
-                className="p-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow"
                 aria-label="Previous page"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
 
-              <form onSubmit={handlePageSubmit} className="flex items-center gap-2 text-sm text-neutral-400">
+              <form onSubmit={handlePageSubmit} className="flex items-center gap-2 text-sm text-neutral-300 font-medium">
                 <input
                   type="number"
                   min={1}
@@ -523,21 +526,21 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
                   value={inputPage}
                   onChange={(e) => setInputPage(e.target.value)}
                   onBlur={() => handlePageSubmit()}
-                  className="w-14 bg-neutral-950 border border-neutral-800 rounded px-2 py-1 text-center font-semibold text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-14 bg-neutral-950 border border-neutral-700/80 rounded-lg px-2 py-1.5 text-center font-bold text-white tabular-nums focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-inner"
                   title="Enter page number to jump"
                 />
-                <span>/</span>
-                <span className="tabular-nums font-medium">{totalPages}</span>
+                <span className="text-neutral-500">/</span>
+                <span className="tabular-nums font-bold text-neutral-200">{totalPages}</span>
                 {rendering && <span className="text-xs text-neutral-500 animate-pulse">(rendering…)</span>}
               </form>
 
               <button
                 onClick={goToNext}
                 disabled={currentPage >= totalPages || rendering}
-                className="p-2 rounded-lg bg-neutral-800 text-neutral-300 hover:bg-neutral-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow"
                 aria-label="Next page"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
