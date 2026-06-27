@@ -151,7 +151,7 @@ export const PdfViewer: React.FC<PdfViewerProps> = ({ url, title }) => {
         const containerHeight = targetContainer.clientHeight || window.innerHeight - 150;
         const unscaledViewport = page.getViewport({ scale: 1 });
 
-        let effectiveScale;
+        let effectiveScale: number;
         if (modalMode) {
           const fitWidthScale = (containerWidth - 48) / unscaledViewport.width;
           const fitHeightScale = (containerHeight - 48) / unscaledViewport.height;
