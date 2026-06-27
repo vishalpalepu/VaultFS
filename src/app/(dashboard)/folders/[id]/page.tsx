@@ -82,6 +82,24 @@ export default function FolderDetailsPage() {
     }
   };
 
+  const handleDeleteCurrentFolder = async () => {
+    if (!folder) return;
+    if (confirm(`Are you sure you want to delete the folder "${folder.name}" and all of its contents?`)) {
+      try {
+        const res = await fetch(`/api/folders/${folder._id}`, { method: "DELETE" });
+        const json = await res.json();
+        if (json.success) {
+          router.push(folder.parentId ? `/folders/${folder.parentId}` : "/folders");
+        } else {
+          alert("Failed to delete folder.");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to delete folder.");
+      }
+    }
+  };
+
   if (loading) {
     return <Spinner size="lg" className="py-20" />;
   }
@@ -135,6 +153,17 @@ export default function FolderDetailsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
             Upload File
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleDeleteCurrentFolder}
+            className="text-xs text-red-400 hover:text-red-300 hover:bg-neutral-800 flex items-center gap-1.5"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete Folder
           </Button>
         </div>
       </div>

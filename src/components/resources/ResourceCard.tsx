@@ -65,14 +65,14 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
   return (
     <Card hoverEffect className="group relative flex flex-col justify-between p-4 bg-neutral-900 border-neutral-800">
       <div>
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-neutral-800 rounded-lg">{getResourceIcon()}</div>
-            <div>
-              <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide">
+        <div className="flex items-start justify-between gap-2 mb-3 min-w-0">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="p-2 bg-neutral-800 rounded-lg shrink-0">{getResourceIcon()}</div>
+            <div className="min-w-0 flex-1">
+              <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide block truncate">
                 {resource.type}
               </span>
-              <h4 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
+              <h4 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors truncate block">
                 {resource.title}
               </h4>
             </div>
@@ -87,7 +87,8 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
                   onDelete(resource._id);
                 }
               }}
-              className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+              className="p-1.5 text-neutral-500 hover:text-red-400 hover:bg-neutral-800 rounded-lg transition-all opacity-60 group-hover:opacity-100 focus:opacity-100 cursor-pointer relative z-10"
+              title="Delete Resource"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
