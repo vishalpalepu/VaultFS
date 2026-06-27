@@ -38,13 +38,33 @@ export async function GET(req: NextRequest, { params }: Params) {
       return new Response("Storage node not found", { status: 404 });
     }
 
-    const resourceType = resource.metadata.cloudinaryResourceType || "raw";
+    let resourceType = resource.metadata.cloudinaryResourceType;
+    let format = resource.metadata.cloudinaryFormat;
+
+    // Fallback for older resources uploaded before cloudinaryResourceType was added to metadata
+    if (!resourceType && resource.metadata.secureUrl) {
+      if (resource.metadata.secureUrl.includes("/image/upload/")) {
+        resourceType = "image";
+        if (resource.metadata.secureUrl.endsWith(".pdf")) {
+          format = "pdf";
+        }
+      } else if (resource.metadata.secureUrl.includes("/video/upload/")) {
+        resourceType = "video";
+      } else {
+        resourceType = "raw";
+      }
+    }
+
+    if (!resourceType) {
+      resourceType = "raw";
+    }
     
     // Generate the Cloudinary URL (using the SDK configuration)
     const cloudinaryUrl = getCloudinaryUrl(
       node,
       resource.metadata.cloudinaryPublicId,
-      resourceType
+      resourceType,
+      format
     );
 
     // Fetch the file from Cloudinary (on the server-side, bypassing CORS and client restrictions)
