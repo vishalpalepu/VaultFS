@@ -1,7 +1,5 @@
 # VaultFS — Federated Knowledge & Resource Repository
 
-![VaultFS Hero banner](https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop)
-
 **VaultFS** is a modern, enterprise-grade federated resource and knowledge management platform. Built with **Next.js**, **TypeScript**, **MongoDB Atlas**, and **Cloudinary**, it introduces a unique decentralized cloud storage orchestration model.
 
 ---
