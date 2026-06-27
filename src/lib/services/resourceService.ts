@@ -56,7 +56,18 @@ export async function createResource(input: CreateResourceInput): Promise<IResou
 
 export async function getResourceById(resourceId: string, ownerId: string) {
   await connectDB();
-  return Resource.findOne({ _id: resourceId, ownerId }).lean();
+  return Resource.findOne({
+    _id: resourceId,
+    $or: [{ ownerId }, { visibility: "SHARED" }],
+  }).lean();
+}
+
+export async function getSharedResources(userId: string) {
+  await connectDB();
+  return Resource.find({ visibility: "SHARED", ownerId: { $ne: userId } })
+    .populate("ownerId", "name email image")
+    .sort({ createdAt: -1 })
+    .lean();
 }
 
 export async function getResourcesByFolder(folderId: string, ownerId: string) {

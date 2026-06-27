@@ -33,7 +33,7 @@ function calculateScore(node: IStorageNodeDoc): number {
  */
 export async function selectStorageNode(
   userId: string
-): Promise<IStorageNodeDoc> {
+): Promise<{ node: IStorageNodeDoc; leaseId?: string; providerId?: string }> {
   await connectDB();
 
   // 1. User-owned nodes
@@ -46,8 +46,11 @@ export async function selectStorageNode(
     $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
   });
 
+  // Filter out leases where usedStorageGB >= maxStorageGB
+  const validLeases = leases.filter((l) => (l.usedStorageGB || 0) < l.maxStorageGB);
+
   // 3. Get leased node provider IDs (direct only)
-  const providerIds = leases.map((l) => l.providerId);
+  const providerIds = validLeases.map((l) => l.providerId);
 
   // 4. Get provider's ACTIVE nodes
   const leasedNodes =
@@ -76,7 +79,12 @@ export async function selectStorageNode(
     });
 
     if (isHealthy) {
-      return node;
+      // Check if this node came from a lease
+      const matchingLease = validLeases.find((l) => l.providerId.toString() === node.ownerId.toString());
+      if (matchingLease) {
+        return { node, leaseId: matchingLease._id.toString(), providerId: matchingLease.providerId.toString() };
+      }
+      return { node };
     } else {
       // Mark invalid/failing node as OFFLINE so it is taken out of rotation
       await StorageNode.updateOne({ _id: node._id }, { $set: { status: "OFFLINE", active: false } });

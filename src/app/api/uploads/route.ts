@@ -8,6 +8,8 @@ import { selectStorageNode } from "@/lib/storage/router";
 import { uploadToCloudinary } from "@/lib/storage/cloudinary";
 import { createResource } from "@/lib/services/resourceService";
 import StorageNode from "@/lib/models/StorageNode";
+import StorageLease from "@/lib/models/StorageLease";
+import { createEvent } from "@/lib/services/eventLogService";
 import { ok, err } from "@/lib/utils/api";
 import type { ResourceType } from "@/types";
 
@@ -56,12 +58,14 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Select best storage node
-    let node;
+    let selection;
     try {
-      node = await selectStorageNode(session.user.id);
+      selection = await selectStorageNode(session.user.id);
     } catch {
       return err("No active storage nodes available.", 503);
     }
+
+    const { node, leaseId, providerId } = selection;
 
     // 2. Upload to Cloudinary
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -91,6 +95,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // If leased node, update lease used storage and create event log
+    if (leaseId && providerId) {
+      await StorageLease.updateOne(
+        { _id: leaseId },
+        { $inc: { usedStorageGB: fileSizeGB } }
+      );
+      await createEvent("RESOURCE_CREATED", session.user.id, leaseId, {
+        leasedNode: true,
+        providerId,
+        fileSizeGB,
+      });
+    }
+
     // 4. Save metadata
     const tags = tagsRaw
       .split(",")
@@ -115,6 +132,9 @@ export async function POST(req: NextRequest) {
         size: file.size,
         mimeType: file.type,
         cloudName: node.cloudName,
+        leased: !!leaseId,
+        leaseId,
+        providerId,
       },
     });
 

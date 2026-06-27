@@ -72,9 +72,16 @@ export const ResourceCard: React.FC<ResourceCardProps> = ({ resource, onDelete }
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <div className="p-2 bg-neutral-800 rounded-lg shrink-0">{getResourceIcon()}</div>
             <div className="min-w-0 flex-1">
-              <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide block truncate">
-                {resource.type}
-              </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wide block truncate">
+                  {resource.type}
+                </span>
+                {resource.metadata?.leased && (
+                  <Badge variant="warning" className="text-[8px] px-1 py-0 uppercase font-mono">
+                    Leased Storage
+                  </Badge>
+                )}
+              </div>
               <h4 className="text-sm font-semibold text-white group-hover:text-blue-400 transition-colors truncate block">
                 {resource.title}
               </h4>

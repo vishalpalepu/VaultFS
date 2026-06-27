@@ -110,6 +110,18 @@ export const LeaseCard: React.FC<LeaseCardProps> = ({
             {lease.expiresAt ? new Date(lease.expiresAt).toLocaleDateString() : "Indefinite"}
           </span>
         </div>
+        <div className="col-span-2 border-t border-neutral-800/60 pt-2 mt-1 space-y-2">
+          <div className="flex justify-between items-center text-[10px]">
+            <span className="text-neutral-500 uppercase">Utilized</span>
+            <span className="text-neutral-300 font-semibold">{(lease.usedStorageGB || 0).toFixed(3)} / {lease.maxStorageGB} GB</span>
+          </div>
+          <div className="w-full bg-neutral-900 h-1.5 rounded-full overflow-hidden border border-neutral-800">
+            <div
+              className="h-full bg-blue-500 transition-all duration-500"
+              style={{ width: `${Math.min(100, ((lease.usedStorageGB || 0) / lease.maxStorageGB) * 100)}%` }}
+            />
+          </div>
+        </div>
         <div className="col-span-2 border-t border-neutral-800/60 pt-2 mt-1">
           <span className="text-[10px] text-neutral-500 block uppercase">Role</span>
           <span className="text-blue-400 font-semibold uppercase text-[10px]">

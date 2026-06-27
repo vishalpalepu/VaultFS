@@ -54,6 +54,9 @@ export interface IResourceMetadata {
   size?: number;
   mimeType?: string;
   cloudName?: string;
+  leased?: boolean;
+  leaseId?: string;
+  providerId?: string;
 }
 
 export interface IResource {
@@ -92,6 +95,7 @@ export interface IStorageLease {
   providerId: string;
   consumerId: string;
   maxStorageGB: number;
+  usedStorageGB?: number;
   status: LeaseStatus;
   expiresAt?: string | null;
   createdAt: string;

@@ -192,6 +192,11 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({ resource }) => {
                 >
                   {resource.visibility}
                 </Badge>
+                {resource.metadata?.leased && (
+                  <Badge variant="warning" className="text-[10px] px-2 uppercase font-mono">
+                    Leased Node
+                  </Badge>
+                )}
               </div>
               <p className="text-xs text-neutral-500">
                 Created on {new Date(resource.createdAt).toLocaleString()}

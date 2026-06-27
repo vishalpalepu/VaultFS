@@ -5,6 +5,7 @@ export interface IStorageLeaseDoc extends Document {
   providerId: mongoose.Types.ObjectId;
   consumerId: mongoose.Types.ObjectId;
   maxStorageGB: number;
+  usedStorageGB: number;
   status: LeaseStatus;
   expiresAt?: Date | null;
   createdAt: Date;
@@ -15,6 +16,7 @@ const StorageLeaseSchema = new Schema<IStorageLeaseDoc>(
     providerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     consumerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     maxStorageGB: { type: Number, required: true },
+    usedStorageGB: { type: Number, default: 0 },
     status: {
       type: String,
       enum: ["PENDING", "ACTIVE", "REVOKED"],
